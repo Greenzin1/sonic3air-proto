@@ -1,0 +1,51 @@
+name: Build Sonic 3 AIR Web (Prototype)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.23
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+      - name: Configure
+        run: |
+          cd Oxygen/sonic3air/build/_emscripten/build
+          emcmake cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+
+      - name: Build
+        run: |
+          cd Oxygen/sonic3air/build/_emscripten/build
+          ninja -j$(nproc)
+
+      - name: Package
+        run: |
+          cd Oxygen/sonic3air
+          python3 $(which emsdk)/upstream/emscripten/tools/file_packager.py \
+            build/_emscripten/dist/sonic3air.data \
+            --js-output=build/_emscripten/dist/loader.js \
+            --preload \
+            data@/sonic3air/data \
+            scripts@/sonic3air/scripts \
+            oxygenproject.json@/sonic3air/oxygenproject.json \
+            --use-preload-cache
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonic3air-proto-web
+          path: |
+            Oxygen/sonic3air/build/_emscripten/dist/
