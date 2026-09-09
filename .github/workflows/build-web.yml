@@ -8,8 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Emscripten
         uses: mymindstorm/setup-emsdk@v14
@@ -19,7 +17,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build
+          sudo apt-get install -y ninja-build
+
+      - name: Create build dir
+        run: mkdir -p Oxygen/sonic3air/build/_emscripten/build
 
       - name: Configure
         run: |
@@ -31,10 +32,10 @@ jobs:
           cd Oxygen/sonic3air/build/_emscripten/build
           ninja -j$(nproc)
 
-      - name: Package
+      - name: Package data
         run: |
           cd Oxygen/sonic3air
-          python3 $(which emsdk)/upstream/emscripten/tools/file_packager.py \
+          python3 $EMSDK/upstream/emscripten/tools/file_packager.py \
             build/_emscripten/dist/sonic3air.data \
             --js-output=build/_emscripten/dist/loader.js \
             --preload \
@@ -47,5 +48,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sonic3air-proto-web
-          path: |
-            Oxygen/sonic3air/build/_emscripten/dist/
+          path: Oxygen/sonic3air/build/_emscripten/dist/
