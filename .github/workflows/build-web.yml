@@ -39,7 +39,7 @@ jobs:
           cd Oxygen/sonic3air
           cp -rn ../oxygenengine/data/* data/ || true
           cp _master_image_template/config.json config.json
-          python3 $(which emsdk)/upstream/emscripten/tools/file_packager.py \
+          python3 $EMSDK/upstream/emscripten/tools/file_packager.py \
             build/_emscripten/dist/sonic3air.data \
             --js-output=build/_emscripten/dist/loader.js \
             --preload \
