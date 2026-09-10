@@ -1,4 +1,4 @@
-name: Build Sonic 3 AIR Web (Prototype)
+name: Build Sonic 3 PTR - Prototype Revisited
 
 on:
   workflow_dispatch:
